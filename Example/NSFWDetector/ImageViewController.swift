@@ -17,6 +17,7 @@ class ImageViewController: UIViewController {
     @IBOutlet private weak var nsfwLabel: UILabel!
 
     var image: UIImage?
+    let detector = NSFWDetector.shared
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,15 +29,20 @@ class ImageViewController: UIViewController {
             self.nsfwLabel.text = "No Image selected."
             return
         }
+        
+        let testImage = UIImage(named: "test")!
 
-        self.imageView.image = image
-
-        NSFWDetector.shared.check(image: image) { result in
-            switch result {
-            case .error:
-                self.nsfwLabel.text = "Detection failed"
-            case let .success(nsfwConfidence: confidence):
-                self.nsfwLabel.text = String(format: "%.1f %% porn", confidence * 100.0)
+        self.imageView.image = testImage
+        
+        Task {
+            let result = await detector.check(image: testImage)
+            await MainActor.run {
+                switch result {
+                case .error:
+                    self.nsfwLabel.text = "Detection failed"
+                case let .success(nsfwConfidence: confidence):
+                    self.nsfwLabel.text = String(format: "%.1f %% porn", confidence * 100.0)
+                }
             }
         }
     }

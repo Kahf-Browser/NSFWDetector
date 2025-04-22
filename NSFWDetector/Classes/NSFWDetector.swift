@@ -18,7 +18,7 @@ public actor NSFWDetector {
     private let model: VNCoreMLModel
 
     private init() {
-        guard let model = try? VNCoreMLModel(for: NSFW(configuration: MLModelConfiguration()).model) else {
+        guard let model = try? VNCoreMLModel(for: NSFWModel(configuration: MLModelConfiguration()).model) else {
             fatalError("NSFW should always be a valid model")
         }
         self.model = model
@@ -69,15 +69,31 @@ private extension NSFWDetector {
         }
 
         /// The request that handles the detection completion
-        let request = VNCoreMLRequest(model: self.model, completionHandler: { (request, error) in
-            guard let observations = request.results as? [VNClassificationObservation], let observation = observations.first(where: { $0.identifier == "NSFW" }) else {
+//        let request = VNCoreMLRequest(model: self.model, completionHandler: { (request, error) in
+//            guard let observations = request.results as? [VNClassificationObservation], let observation = observations.first(where: { $0.identifier == "NSFW" }) else {
+//                completion(.error(NSError(domain: "Detection failed: No NSFW Observation found", code: 0, userInfo: nil)))
+//
+//                return
+//            }
+//
+//            completion(.success(nsfwConfidence: observation.confidence))
+//        })
+        
+        let request = VNCoreMLRequest(model: model) { request, error in
+            let results = request.results?.first as? VNClassificationObservation
+//            if let identifier =  results?.identifier, identifier == "NSFW" {
+//                completion(true)
+//            } else {
+//                completion(false)
+//            }
+            
+            if let confidence =  results?.confidence {
+                completion(.success(nsfwConfidence: confidence))
+            } else {
                 completion(.error(NSError(domain: "Detection failed: No NSFW Observation found", code: 0, userInfo: nil)))
-
-                return
             }
-
-            completion(.success(nsfwConfidence: observation.confidence))
-        })
+            
+        }
         
         /**
          * `@Required`:
