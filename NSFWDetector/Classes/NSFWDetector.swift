@@ -34,10 +34,11 @@ public actor NSFWDetector {
     }
 
     public func check(image: UIImage) async -> DetectionResult {
+        let resizedImage = image.resize(to: CGSize(width: 224, height: 224))
         let requestHandler: VNImageRequestHandler?
-        if let cgImage = image.cgImage {
+        if let cgImage = resizedImage?.cgImage {
             requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        } else if let ciImage = image.ciImage {
+        } else if let ciImage = resizedImage?.ciImage {
             requestHandler = VNImageRequestHandler(ciImage: ciImage, options: [:])
         } else {
             requestHandler = nil
