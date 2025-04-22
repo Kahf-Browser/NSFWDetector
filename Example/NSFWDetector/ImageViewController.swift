@@ -30,7 +30,7 @@ class ImageViewController: UIViewController {
             return
         }
         
-        let testImage = UIImage(named: "test")!
+        let testImage = UIImage(named: "test1")!
 
         self.imageView.image = testImage
         

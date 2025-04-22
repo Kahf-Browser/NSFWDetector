@@ -81,14 +81,8 @@ private extension NSFWDetector {
         
         let request = VNCoreMLRequest(model: model) { request, error in
             let results = request.results?.first as? VNClassificationObservation
-//            if let identifier =  results?.identifier, identifier == "NSFW" {
-//                completion(true)
-//            } else {
-//                completion(false)
-//            }
-            
-            if let confidence =  results?.confidence {
-                completion(.success(nsfwConfidence: confidence))
+            if let identifier = results?.identifier, let confidence =  results?.confidence {
+                completion(.success(nsfwConfidence: identifier == "NSFW" ? confidence : 1 - confidence))
             } else {
                 completion(.error(NSError(domain: "Detection failed: No NSFW Observation found", code: 0, userInfo: nil)))
             }
