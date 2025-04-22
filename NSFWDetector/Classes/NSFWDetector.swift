@@ -18,7 +18,7 @@ public actor NSFWDetector {
     private let model: VNCoreMLModel
 
     private init() {
-        guard let model = try? VNCoreMLModel(for: NSFWModel(configuration: MLModelConfiguration()).model) else {
+        guard let model = try? VNCoreMLModel(for: model_fp8(configuration: MLModelConfiguration()).model) else {
             fatalError("NSFW should always be a valid model")
         }
         self.model = model
