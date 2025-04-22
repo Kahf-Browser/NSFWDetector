@@ -11,13 +11,13 @@ import Vision
 import UIKit
 
 @available(iOS 12.0, *)
-public class NSFWDetector {
+public actor NSFWDetector {
 
     public static let shared = NSFWDetector()
 
     private let model: VNCoreMLModel
 
-    public required init() {
+    private init() {
         guard let model = try? VNCoreMLModel(for: NSFW(configuration: MLModelConfiguration()).model) else {
             fatalError("NSFW should always be a valid model")
         }
@@ -33,9 +33,7 @@ public class NSFWDetector {
         case success(nsfwConfidence: Float)
     }
 
-    public func check(image: UIImage, completion: @escaping (_ result: DetectionResult) -> Void) {
-
-        // Create a requestHandler for the image
+    public func check(image: UIImage) async -> DetectionResult {
         let requestHandler: VNImageRequestHandler?
         if let cgImage = image.cgImage {
             requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
@@ -44,8 +42,12 @@ public class NSFWDetector {
         } else {
             requestHandler = nil
         }
-
-        self.check(requestHandler, completion: completion)
+        
+        return await withCheckedContinuation { continuation in
+            self.check(requestHandler) { result in
+                continuation.resume(returning: result)
+            }
+        }
     }
 
     public func check(cvPixelbuffer: CVPixelBuffer, completion: @escaping (_ result: DetectionResult) -> Void) {
