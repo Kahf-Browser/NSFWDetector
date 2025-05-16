@@ -35,6 +35,7 @@ class ImageViewController: UIViewController {
         self.imageView.image = testImage
         
         Task {
+            await detector.configureCoreMLModel()
             let result = await detector.check(image: testImage)
             await MainActor.run {
                 switch result {

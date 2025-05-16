@@ -15,13 +15,25 @@ public actor NSFWDetector {
 
     public static let shared = NSFWDetector()
 
-    private let model: VNCoreMLModel
+    private var model: VNCoreMLModel?
 
-    private init() {
-        guard let model = try? VNCoreMLModel(for: model_fp8(configuration: MLModelConfiguration()).model) else {
-            fatalError("NSFW should always be a valid model")
+    private init() {}
+    
+    public func configureCoreMLModel() async {
+        do {
+            let config = MLModelConfiguration()
+            config.computeUnits = .all
+            config.allowLowPrecisionAccumulationOnGPU = true
+            
+            guard let model = try? model_fp8(configuration: config) else {
+                print("failed to init model")
+                return
+            }
+            
+            self.model = try VNCoreMLModel(for: model.model)
+        } catch let error as NSError {
+            print("Model loading went wrong: \(error)")
         }
-        self.model = model
     }
 
     /// The Result of an NSFW Detection
@@ -63,6 +75,11 @@ public actor NSFWDetector {
 private extension NSFWDetector {
 
     func check(_ requestHandler: VNImageRequestHandler?, completion: @escaping (_ result: DetectionResult) -> Void) {
+        
+        guard let model = model else {
+            completion(.error(NSError(domain: "Detection failed: NSFW Model initialization failed", code: 0, userInfo: nil)))
+            return
+        }
 
         guard let requestHandler = requestHandler else {
             completion(.error(NSError(domain: "either cgImage or ciImage must be set inside of UIImage", code: 0, userInfo: nil)))
