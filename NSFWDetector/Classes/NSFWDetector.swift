@@ -53,12 +53,41 @@ public actor NSFWDetector {
         } else if let ciImage = resizedImage?.ciImage {
             requestHandler = VNImageRequestHandler(ciImage: ciImage, options: [:])
         } else {
-            requestHandler = nil
+            return .error(NSError(domain: "Invalid image format", code: 0, userInfo: nil))
+        }
+        
+        guard let model = self.model else {
+            return .error(NSError(domain: "Detection failed: NSFW Model initialization failed", code: 0, userInfo: nil))
+        }
+        
+        guard let requestHandler = requestHandler else {
+            return .error(NSError(domain: "either cgImage or ciImage must be set inside of UIImage", code: 0, userInfo: nil))
         }
         
         return await withCheckedContinuation { continuation in
-            self.check(requestHandler) { result in
-                continuation.resume(returning: result)
+            
+            let request = VNCoreMLRequest(model: model) { request, error in
+                if let error = error {
+                    continuation.resume(returning: .error(error))
+                    return
+                }
+                
+                let results = request.results?.first as? VNClassificationObservation
+                if let identifier = results?.identifier, let confidence = results?.confidence {
+                    continuation.resume(returning: .success(nsfwConfidence: identifier == "NSFW" ? confidence : 1 - confidence))
+                } else {
+                    continuation.resume(returning: .error(NSError(domain: "Detection failed: No NSFW Observation found", code: 0, userInfo: nil)))
+                }
+            }
+            
+            #if targetEnvironment(simulator)
+            request.usesCPUOnly = true
+            #endif
+            
+            do {
+                try requestHandler.perform([request])
+            } catch {
+                continuation.resume(returning: .error(error))
             }
         }
     }
