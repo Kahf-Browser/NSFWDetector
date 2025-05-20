@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1F1571112C50097E00BD002F /* NSFWDetector in Frameworks */ = {isa = PBXBuildFile; productRef = 1F1571102C50097E00BD002F /* NSFWDetector */; };
+		3C3AB1372DDC69060002F23B /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 3C3AB1362DDC69060002F23B /* Atomics */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
@@ -38,6 +39,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1F1571112C50097E00BD002F /* NSFWDetector in Frameworks */,
+				3C3AB1372DDC69060002F23B /* Atomics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +114,7 @@
 			name = NSFWDetector_Example;
 			packageProductDependencies = (
 				1F1571102C50097E00BD002F /* NSFWDetector */,
+				3C3AB1362DDC69060002F23B /* Atomics */,
 			);
 			productName = NSFWDetector;
 			productReference = 607FACD01AFB9204008FA782 /* NSFWDetector_Example.app */;
@@ -143,6 +146,9 @@
 				Base,
 			);
 			mainGroup = 607FACC71AFB9204008FA782;
+			packageReferences = (
+				3C3AB1352DDC69060002F23B /* XCRemoteSwiftPackageReference "swift-atomics" */,
+			);
 			productRefGroup = 607FACD11AFB9204008FA782 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -367,10 +373,26 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		3C3AB1352DDC69060002F23B /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-atomics.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		1F1571102C50097E00BD002F /* NSFWDetector */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = NSFWDetector;
+		};
+		3C3AB1362DDC69060002F23B /* Atomics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3C3AB1352DDC69060002F23B /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			productName = Atomics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

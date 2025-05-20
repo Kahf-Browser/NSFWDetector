@@ -12,5 +12,7 @@
 *.xcscmblueprint
 xcuserdata/
 
+.build/
+
 # SwiftPM
 .swiftpm

@@ -9,6 +9,7 @@ import Foundation
 import CoreML
 import Vision
 import UIKit
+import Atomics
 
 @available(iOS 12.0, *)
 public actor NSFWDetector {
@@ -65,18 +66,25 @@ public actor NSFWDetector {
         }
         
         return await withCheckedContinuation { continuation in
-            
+            let hasResumed = ManagedAtomic<Bool>(false)
+
+            let safeResume: (DetectionResult) -> Void = { result in
+                if hasResumed.compareExchange(expected: false, desired: true, ordering: .relaxed).exchanged {
+                    continuation.resume(returning: result)
+                }
+            }
+
             let request = VNCoreMLRequest(model: model) { request, error in
                 if let error = error {
-                    continuation.resume(returning: .error(error))
+                    safeResume(.error(error))
                     return
                 }
                 
                 let results = request.results?.first as? VNClassificationObservation
                 if let identifier = results?.identifier, let confidence = results?.confidence {
-                    continuation.resume(returning: .success(nsfwConfidence: identifier == "NSFW" ? confidence : 1 - confidence))
+                    safeResume(.success(nsfwConfidence: identifier == "NSFW" ? confidence : 1 - confidence))
                 } else {
-                    continuation.resume(returning: .error(NSError(domain: "Detection failed: No NSFW Observation found", code: 0, userInfo: nil)))
+                    safeResume(.error(NSError(domain: "Detection failed: No NSFW Observation found", code: 0, userInfo: nil)))
                 }
             }
             
@@ -87,7 +95,7 @@ public actor NSFWDetector {
             do {
                 try requestHandler.perform([request])
             } catch {
-                continuation.resume(returning: .error(error))
+                safeResume(.error(error))
             }
         }
     }

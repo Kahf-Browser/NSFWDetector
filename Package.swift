@@ -11,9 +11,17 @@ let package = Package(
             targets: ["NSFWDetector"]
         )
     ],
-    targets: [
+    dependencies: [
+        .package(
+            url: "https://github.com/apple/swift-atomics.git",
+            from: "1.1.0"
+        )
+    ], targets: [
         .target(
             name: "NSFWDetector",
+            dependencies: [
+                .product(name: "Atomics", package: "swift-atomics")
+            ],
             path: "NSFWDetector"
         )
     ]
